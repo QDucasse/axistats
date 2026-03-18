@@ -1,3 +1,23 @@
+-- ============================================================================
+-- File: axi_stats_tb.vhd
+-- Description: AXI stats module
+--
+-- Copyright (C) 2026 Quentin Ducasse
+--
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-- ============================================================================
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -299,7 +319,7 @@ begin
               s_axi_arready, s_axi_rvalid, clock,
               x"14", max_burst);
 
-        -- Read min_gap (0x14)
+        -- Read min_gap (0x18)
         axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
               s_axi_arready, s_axi_rvalid, clock,
               x"18", min_gap);
