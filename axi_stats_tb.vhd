@@ -281,14 +281,12 @@ begin
         s_axis_tdata  <= x"4444444444444444";
         wait for 2 ns;
 
-
         ----------------------------------------------------------------
         -- AXI-LITE WRITE DISABLE
         ----------------------------------------------------------------
 
         axi_lite_write(s_axi_awaddr, s_axi_awvalid, s_axi_wdata, s_axi_wvalid,
                s_axi_awready, s_axi_wready, s_axi_bvalid, clock, x"00", x"00000000");
-
 
         ----------------------------------------------------------------
         -- AXI-LITE READ: dump stats registers
@@ -357,6 +355,87 @@ begin
         report "Sum burst     : " & integer'image(to_integer(unsigned(sum_burst)));
         report "Sum gaps      : " & integer'image(to_integer(unsigned(sum_gaps)));
         report "=================";
+
+
+        ----------------------------------------------------------------
+        -- AXI-LITE WRITE RESET
+        ----------------------------------------------------------------
+
+        axi_lite_write(s_axi_awaddr, s_axi_awvalid, s_axi_wdata, s_axi_wvalid,
+               s_axi_awready, s_axi_wready, s_axi_bvalid, clock,
+               x"00", x"00000002");  -- bit 1 = stats_reset
+
+        -- Wait a few cycles for the self-clearing reset
+        wait for 4 ns;
+
+        ----------------------------------------------------------------
+        -- AXI-LITE READ: confirm counters reset
+        ----------------------------------------------------------------
+
+                -- Read total_cycles (0x04)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"04", total_cycles);
+
+        -- Read packet_count (0x08)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"08", packet_count);
+
+        -- Read idle_cycles (0x0C)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"0C", idle_cycles);
+
+        -- Read burst_count (0x10)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"10", burst_count);
+
+        -- Read max_burst (0x14)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"14", max_burst);
+
+        -- Read min_gap (0x18)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"18", min_gap);
+
+        -- Read max_gap (0x1C)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"1C", max_gap);
+
+        -- Read gap_events (0x20)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"20", gap_events);
+
+        -- Read sum_burst (0x24)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"24", sum_burst);
+
+        -- Read sum_gaps (0x28)
+        axi_lite_read(s_axi_araddr, s_axi_arvalid, s_axi_rdata,
+              s_axi_arready, s_axi_rvalid, clock,
+              x"28", sum_gaps);
+
+        -- Print all stats in a simple report
+        report "=== AXI Stats ===";
+        report "Total cycles  : " & integer'image(to_integer(unsigned(total_cycles)));
+        report "Packet count  : " & integer'image(to_integer(unsigned(packet_count)));
+        report "Idle cycles   : " & integer'image(to_integer(unsigned(idle_cycles)));
+        report "Burst count   : " & integer'image(to_integer(unsigned(burst_count)));
+        report "Max burst     : " & integer'image(to_integer(unsigned(max_burst)));
+        report "Min gap       : " & integer'image(to_integer(unsigned(min_gap)));
+        report "Max gap       : " & integer'image(to_integer(unsigned(max_gap)));
+        report "Gap events    : " & integer'image(to_integer(unsigned(gap_events)));
+        report "Sum burst     : " & integer'image(to_integer(unsigned(sum_burst)));
+        report "Sum gaps      : " & integer'image(to_integer(unsigned(sum_gaps)));
+        report "=================";
+
 
         wait;
     end process;

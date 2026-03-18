@@ -70,7 +70,8 @@ void axi_stats_close(axi_stats_t *handle)
 
 void axi_stats_enable(axi_stats_t *handle)
 {
-    handle->regs[AXI_STATS_CTRL/4] = 1;
+    // Bit 0 - enable, bit 1 - reset counters
+    handle->regs[AXI_STATS_CTRL/4] = 3;
 }
 
 

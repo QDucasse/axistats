@@ -30,7 +30,7 @@ use ieee.numeric_std.all;
 --   burst details,
 --
 -- Presents an AXI-Lite interface to activate the module and read the stats:
---   0x0: Control (bit 0 = stats enable)
+--   0x0: Control (bit 0 = stats enable, bit 1 = reset)
 --   0x4: Total cycles [31:0]
 --   0x8: Packet count [31:0]
 --   0xC: Idle cycles [31:0]
@@ -89,8 +89,12 @@ end entity;
 
 architecture Behavioral of axi_stats is
 
-    -- Enable
-    signal stats_en      : std_logic := '1';
+    -- Enable/Reset
+    signal stats_en      : std_logic := '0';
+    signal stats_reset   : std_logic := '0';
+
+    -- Reset handle, AXI write capture
+    signal stats_reset_req   : std_logic := '0';
 
     -- Stats for the AXI transfer
     signal total_cycles  : unsigned(COUNTER_W-1 downto 0);
@@ -157,7 +161,7 @@ begin
     process(aclk)
     begin
         if rising_edge(aclk) then
-            if aresetn='0' then
+            if aresetn = '0' or stats_reset = '1' then
                 -- Cycle info
                 total_cycles  <= (others=>'0');
                 packet_count  <= (others=>'0');
@@ -242,7 +246,7 @@ begin
     process(aclk)
     begin
         if rising_edge(aclk) then
-            if aresetn='0' then
+            if aresetn = '0' then
                 awready_i <= '0';
                 wready_i  <= '0';
                 bvalid_i  <= '0';
@@ -281,7 +285,8 @@ begin
 
                     -- Register write
                     if awaddr_reg = x"00" then
-                        stats_en <= wdata_reg(0);
+                        stats_en        <= wdata_reg(0);
+                        stats_reset_req <= wdata_reg(1);
                     end if;
 
                 elsif (bvalid_i = '1' and s_axi_bready = '1') then
@@ -308,6 +313,7 @@ begin
                     rresp_i  <= "00";
 
                     case araddr_reg is
+                        -- reset bit not readable as it is self-clearing
                         when x"00" => s_axi_rdata <= (31 downto 1=>'0') & stats_en;
                         when x"04" => s_axi_rdata <= std_logic_vector(total_cycles(31 downto 0));
                         when x"08" => s_axi_rdata <= std_logic_vector(packet_count(31 downto 0));
@@ -326,7 +332,13 @@ begin
                     rvalid_i <= '0';
                     read_in_progress <= '0';
                 end if;
-
+            end if;
+            -- Self-clearing reset logic
+            if stats_reset_req = '1' then
+                stats_reset <= '1';
+                stats_reset_req <= '0'; -- clear the request
+            else
+                stats_reset <= '0';
             end if;
         end if;
     end process;

@@ -62,7 +62,7 @@ The module expects a write to `AXISTATS_CTRL` (offset `0`) with `1` to start the
 
 | Offset |      Name       |                 Description                           |
 | ------ | --------------- | ----------------------------------------------------- |
-| `0x00` | `AXISTATS_CTRL` |  Control register to enable/disable stats collection  |
+| `0x00` | `AXISTATS_CTRL` |  Control register                                     |
 | `0x04` | `AXISTATS_TOTC` |  Total cycles                                         |
 | `0x08` | `AXISTATS_PKTC` |  Packet count                                         |
 | `0x0C` | `AXISTATS_IDLC` |  Idle cycles                                          |
@@ -74,6 +74,13 @@ The module expects a write to `AXISTATS_CTRL` (offset `0`) with `1` to start the
 | `0x24` | `AXISTATS_BSTS` |  Bursts sum                                           |
 | `0x28` | `AXISTATS_GAPS` |  Gaps sum                                             |
 
+
+For `AXISTATS_CTRL`:
+
+| Bit   |           Description                | Read/Write |
+| ----- | ------------------------------------ | ---------- |
+| `0`   | Enable (1 enabled, 0 disabled)       |    `RW`    |
+| `1`   | Reset (1 to activate, self-clearing) |    `W `    |
 
 ### Simulation
 
@@ -99,6 +106,23 @@ Note: Sum gaps      : 2
 Note: =================
 ```
 
+- reseting counters, writing `2` (bit 1 high) to the control register
+- reading all stats again:
+
+```
+Note: === AXI Stats ===
+Note: Total cycles  : 0
+Note: Packet count  : 0
+Note: Idle cycles   : 0
+Note: Burst count   : 0
+Note: Max burst     : 0
+Note: Min gap       : 0
+Note: Max gap       : 0
+Note: Gap events    : 0
+Note: Sum burst     : 0
+Note: Sum gaps      : 0
+Note: =================
+```
 
 ### Usage
 
