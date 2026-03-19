@@ -220,16 +220,16 @@ begin
     -- Simulation process
     simulation_process: process
         -- Variables to store read results
-        variable total_cycles : std_logic_vector(31 downto 0);
-        variable packet_count : std_logic_vector(31 downto 0);
-        variable idle_cycles  : std_logic_vector(31 downto 0);
-        variable burst_count  : std_logic_vector(31 downto 0);
-        variable max_burst    : std_logic_vector(31 downto 0);
-        variable min_gap      : std_logic_vector(31 downto 0);
-        variable max_gap      : std_logic_vector(31 downto 0);
-        variable gap_events   : std_logic_vector(31 downto 0);
-        variable sum_burst    : std_logic_vector(31 downto 0);
-        variable sum_gaps     : std_logic_vector(31 downto 0);
+        variable total_cycles   : std_logic_vector(31 downto 0);
+        variable transfer_count : std_logic_vector(31 downto 0);
+        variable idle_cycles    : std_logic_vector(31 downto 0);
+        variable burst_count    : std_logic_vector(31 downto 0);
+        variable max_burst      : std_logic_vector(31 downto 0);
+        variable min_gap        : std_logic_vector(31 downto 0);
+        variable max_gap        : std_logic_vector(31 downto 0);
+        variable gap_events     : std_logic_vector(31 downto 0);
+        variable sum_burst      : std_logic_vector(31 downto 0);
+        variable sum_gaps       : std_logic_vector(31 downto 0);
     begin
         -- wait for reset
         wait until reset = '1';
@@ -423,18 +423,18 @@ begin
               x"28", sum_gaps);
 
         -- Print all stats in a simple report
-        report "=== AXI Stats ===";
-        report "Total cycles  : " & integer'image(to_integer(unsigned(total_cycles)));
-        report "Packet count  : " & integer'image(to_integer(unsigned(packet_count)));
-        report "Idle cycles   : " & integer'image(to_integer(unsigned(idle_cycles)));
-        report "Burst count   : " & integer'image(to_integer(unsigned(burst_count)));
-        report "Max burst     : " & integer'image(to_integer(unsigned(max_burst)));
-        report "Min gap       : " & integer'image(to_integer(unsigned(min_gap)));
-        report "Max gap       : " & integer'image(to_integer(unsigned(max_gap)));
-        report "Gap events    : " & integer'image(to_integer(unsigned(gap_events)));
-        report "Sum burst     : " & integer'image(to_integer(unsigned(sum_burst)));
-        report "Sum gaps      : " & integer'image(to_integer(unsigned(sum_gaps)));
-        report "=================";
+        report "=== AXI Stats ====";
+        report "Total cycles   : " & integer'image(to_integer(unsigned(total_cycles)));
+        report "Transfer count : " & integer'image(to_integer(unsigned(packet_count)));
+        report "Idle cycles    : " & integer'image(to_integer(unsigned(idle_cycles)));
+        report "Burst count    : " & integer'image(to_integer(unsigned(burst_count)));
+        report "Max burst      : " & integer'image(to_integer(unsigned(max_burst)));
+        report "Min gap        : " & integer'image(to_integer(unsigned(min_gap)));
+        report "Max gap        : " & integer'image(to_integer(unsigned(max_gap)));
+        report "Gap events     : " & integer'image(to_integer(unsigned(gap_events)));
+        report "Sum burst      : " & integer'image(to_integer(unsigned(sum_burst)));
+        report "Sum gaps       : " & integer'image(to_integer(unsigned(sum_gaps)));
+        report "==================";
 
 
         wait;

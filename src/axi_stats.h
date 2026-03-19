@@ -35,7 +35,7 @@
 typedef enum {
     AXI_STATS_CTRL       = 0x00,
     AXI_STATS_TOTAL      = 0x04,
-    AXI_STATS_PACKETS    = 0x08,
+    AXI_STATS_TRANSFERS  = 0x08,
     AXI_STATS_IDLE       = 0x0C,
     AXI_STATS_BURST_CNT  = 0x10,
     AXI_STATS_MAX_BURST  = 0x14,

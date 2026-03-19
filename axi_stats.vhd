@@ -32,7 +32,7 @@ use ieee.numeric_std.all;
 -- Presents an AXI-Lite interface to activate the module and read the stats:
 --   0x0: Control (bit 0 = stats enable, bit 1 = reset)
 --   0x4: Total cycles [31:0]
---   0x8: Packet count [31:0]
+--   0x8: Transfer count [31:0]
 --   0xC: Idle cycles [31:0]
 --   0x10: Burst count [31:0]
 --   0x14: Max burst [31:0]
@@ -97,9 +97,9 @@ architecture Behavioral of axi_stats is
     signal stats_reset_req   : std_logic := '0';
 
     -- Stats for the AXI transfer
-    signal total_cycles  : unsigned(COUNTER_W-1 downto 0);
-    signal packet_count  : unsigned(COUNTER_W-1 downto 0);
-    signal idle_cycles   : unsigned(COUNTER_W-1 downto 0);
+    signal total_cycles   : unsigned(COUNTER_W-1 downto 0);
+    signal transfer_count : unsigned(COUNTER_W-1 downto 0);
+    signal idle_cycles    : unsigned(COUNTER_W-1 downto 0);
 
     signal gap_counter   : unsigned(COUNTER_W-1 downto 0);
     signal min_gap       : unsigned(COUNTER_W-1 downto 0);
@@ -112,13 +112,13 @@ architecture Behavioral of axi_stats is
     signal max_burst     : unsigned(COUNTER_W-1 downto 0);
     signal sum_burst     : unsigned(COUNTER_W-1 downto 0);
 
-    signal back_to_back  : unsigned(COUNTER_W-1 downto 0);
+    signal consecutive_transfer_cycles : unsigned(COUNTER_W-1 downto 0);
 
-    signal prev_valid    : std_logic;
-    signal seen_packet   : std_logic;
+    signal prev_valid        : std_logic;
+    signal has_seen_transfer : std_logic;
 
-    signal transfer      : std_logic;
-    signal tready_int    : std_logic;
+    signal transfer : std_logic;
+    signal ready    : std_logic;
 
     -- AXI-Lite signals
     signal awready_i : std_logic := '0';
@@ -141,8 +141,8 @@ architecture Behavioral of axi_stats is
 begin
 
     -- AXI stream passthrough when disabled
-    tready_int <= m_axis_tready when stats_en = '1' else '1';
-    s_axis_tready <= tready_int;
+    ready <= m_axis_tready when stats_en = '1' else '1';
+    s_axis_tready <= ready;
     m_axis_tvalid <= s_axis_tvalid;
     m_axis_tdata  <= s_axis_tdata;
 
@@ -157,15 +157,15 @@ begin
     s_axi_rresp   <= rresp_i;
 
     -- Counting logic
-    transfer <= s_axis_tvalid and tready_int;
+    transfer <= s_axis_tvalid and ready;
     process(aclk)
     begin
         if rising_edge(aclk) then
             if aresetn = '0' or stats_reset = '1' then
                 -- Cycle info
-                total_cycles  <= (others=>'0');
-                packet_count  <= (others=>'0');
-                idle_cycles   <= (others=>'0');
+                total_cycles   <= (others=>'0');
+                transfer_count <= (others=>'0');
+                idle_cycles    <= (others=>'0');
 
                 -- Gap info (cycles between packets)
                 gap_counter   <= (others=>'0');
@@ -181,9 +181,9 @@ begin
                 sum_burst     <= (others=>'0');
 
                 -- Current values
-                back_to_back  <= (others=>'0');
-                prev_valid    <= '0';
-                seen_packet   <= '0';
+                consecutive_transfer_cycles <= (others=>'0');
+                has_seen_transfer           <= '0';
+                prev_valid                  <= '0';
             else
                 if stats_en = '1' then
                     -- Global cycle count
@@ -191,17 +191,19 @@ begin
 
                     if transfer = '1' then
 
-                        packet_count <= packet_count + 1;
-                        burst_len    <= burst_len + 1;
+                        transfer_count <= transfer_count + 1;
+                        burst_len      <= burst_len + 1;
+
+                        has_seen_transfer <= '1';  -- monotonic latch
 
                         if prev_valid = '1' then
-                            back_to_back <= back_to_back + 1;
+                            consecutive_transfer_cycles <= consecutive_transfer_cycles + 1;
                         else
                             -- New burst
                             burst_count <= burst_count + 1;
 
-                            -- Updating gap events
-                            if seen_packet = '1' then
+                            -- Gap is valid only after first-ever transfer
+                            if has_seen_transfer = '1' then
                                 gap_events <= gap_events + 1;
                                 sum_gaps   <= sum_gaps + gap_counter;
 
@@ -215,11 +217,9 @@ begin
                             end if;
 
                             gap_counter <= (others=>'0');
-                            seen_packet <= '1';
-
                         end if;
 
-                    else -- s_axis_tvalid = '0'
+                    else -- taxis_valid
                         idle_cycles <= idle_cycles + 1;
                         gap_counter <= gap_counter + 1;
 
@@ -316,7 +316,7 @@ begin
                         -- reset bit not readable as it is self-clearing
                         when x"00" => s_axi_rdata <= (31 downto 1=>'0') & stats_en;
                         when x"04" => s_axi_rdata <= std_logic_vector(total_cycles(31 downto 0));
-                        when x"08" => s_axi_rdata <= std_logic_vector(packet_count(31 downto 0));
+                        when x"08" => s_axi_rdata <= std_logic_vector(transfer_count(31 downto 0));
                         when x"0C" => s_axi_rdata <= std_logic_vector(idle_cycles(31 downto 0));
                         when x"10" => s_axi_rdata <= std_logic_vector(burst_count(31 downto 0));
                         when x"14" => s_axi_rdata <= std_logic_vector(max_burst(31 downto 0));

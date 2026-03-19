@@ -88,16 +88,16 @@ uint32_t axi_stats_read(axi_stats_t *handle, axi_stats_reg_t reg)
 
 
 static axi_stat_desc_t stats[] = {
-    {"Total cycles", AXI_STATS_TOTAL},
-    {"Packet count", AXI_STATS_PACKETS},
-    {"Idle cycles",  AXI_STATS_IDLE},
-    {"Burst count",  AXI_STATS_BURST_CNT},
-    {"Max burst",    AXI_STATS_MAX_BURST},
-    {"Min gap",      AXI_STATS_MIN_GAP},
-    {"Max gap",      AXI_STATS_MAX_GAP},
-    {"Gap events",   AXI_STATS_GAP_EVENTS},
-    {"Sum burst",    AXI_STATS_SUM_BURST},
-    {"Sum gaps",     AXI_STATS_SUM_GAPS},
+    {"Total cycles",   AXI_STATS_TOTAL},
+    {"Transfer count", AXI_STATS_TRANSFERS},
+    {"Idle cycles",    AXI_STATS_IDLE},
+    {"Burst count",    AXI_STATS_BURST_CNT},
+    {"Max burst",      AXI_STATS_MAX_BURST},
+    {"Min gap",        AXI_STATS_MIN_GAP},
+    {"Max gap",        AXI_STATS_MAX_GAP},
+    {"Gap events",     AXI_STATS_GAP_EVENTS},
+    {"Sum burst",      AXI_STATS_SUM_BURST},
+    {"Sum gaps",       AXI_STATS_SUM_GAPS},
 };
 
 void axi_stats_print(axi_stats_t *handle)
