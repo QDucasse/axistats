@@ -169,7 +169,7 @@ begin
 
                 -- Gap info (cycles between packets)
                 gap_counter   <= (others=>'0');
-                min_gap       <= (others=>'1');
+                min_gap       <= (others=>'0');
                 max_gap       <= (others=>'0');
                 sum_gaps      <= (others=>'0');
                 gap_events    <= (others=>'0');
